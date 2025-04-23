@@ -12,7 +12,7 @@ tramp
 /eshell/history
 /eshell/lastdir
 /elpa/
-*.rel
+*.re
 /auto/
 .cask/
 dist/
