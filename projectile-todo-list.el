@@ -62,6 +62,27 @@
     (when marker
       (string-match-p (concat "^\\s-*" (regexp-quote marker)) line))))
 
+(defun projectile-todo-list--scan-file (file)
+  "Scan FILE for TODO-style comments. Returns a list."
+  (let ((matches '()))
+    (with-temp-buffer
+      (insert-file-contents file)
+      ;; Auto detect FILE major mode
+      (delay-mode-hooks (set-auto-mode))
+      (let ((mode major-mode))
+	(goto-char (point-min))
+	(while (re-search-forward (regexp-opt projectile-todo-list-keywords 'words) nil t)
+	  (if (nth 4 (syntax-ppss))
+	      (let ((line (line-number-at-pos))
+		    (text (string-trim (buffer-substring (line-beginning-position) (line-end-position)))))
+		(push (list :file file :line line :text text) matches))
+	    ;; Fallback: Check list of comment markers
+	    (let* ((text (buffer-substring (line-beginning-position) (line-end-position)))
+		   (line (line-number-at-pos)))
+	      (when (projectile-todo-list--line-starts-with-comment text mode)
+		(push (list :file file :line line :text text (string-trim text)) matches)))))))
+    matches))
+
 (provide 'projectile-todo-list)
 
 ;;; projectile-todo-list.el ends here
