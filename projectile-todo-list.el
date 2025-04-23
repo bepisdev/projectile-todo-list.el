@@ -94,8 +94,21 @@
 (defun projectile-todo-list--display-results (results)
   "Display RESULTS in a buffer with navigation controls."
   (with-current-buffer (get-buffer-create projectile-todo-list-results-buffer)
-    ;; TODO: Configure display buffer here.
-    ))
+    (read-only-mode -1)
+    (erase-buffer)
+    (insert (format "%-8s %-40s %s\n" "Line" "File" "Text"))
+    (insert (make-string 80 ?-) "\n")
+    (dolist (item results)
+      (let* ((file (plist-get item :file))
+	     (line (plist-get item :line))
+	     (text (plist-get item :text)))
+	(insert-text-button
+	 (format"%-8d %-40s %s\n" line (file-name-nondirectory file) text)
+         'action (lambda (_) (find-file file) (goto-line line))
+         'follow-link t)))
+    (read-only-mode 1)
+    (goto-char (point-min))
+    (display-buffer (current-buffer))))
 
 (provide 'projectile-todo-list)
 
