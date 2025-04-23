@@ -83,6 +83,20 @@
 		(push (list :file file :line line :text text (string-trim text)) matches)))))))
     matches))
 
+(defun projectile-todo-list--collect-todos ()
+  "Walk file tree of the current project and collect TODO-style comments."
+  (let ((files (projectile-todo-list--get-project-files))
+	(results '()))
+    (dolist (file files)
+      (setq results (append results (projectile-todo-list--scan-file file))))
+    results))
+
+(defun projectile-todo-list--display-results (results)
+  "Display RESULTS in a buffer with navigation controls."
+  (with-current-buffer (get-buffer-create projectile-todo-list-results-buffer)
+    ;; TODO: Configure display buffer here.
+    ))
+
 (provide 'projectile-todo-list)
 
 ;;; projectile-todo-list.el ends here
