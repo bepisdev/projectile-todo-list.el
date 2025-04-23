@@ -53,10 +53,10 @@
 (defun projectile-todo-list--get-project-files ()
   "Return the file tree of the current project."
   (if (projectile-project-p)
-      (mapcar (lambda (f) (expand-file-name f (projectile-project-root)))
-	      (projectile-current-project-files))
-    (error "Not in a valid Projectile project")))
-
+      (let ((project-root (projectile-project-root)))
+	(mapcar (lambda (f) (expand-file-name f project-root))
+		(projectile-project-files project-root)))
+    (error "Not in a valid projectile project")))
 (defun projectile-todo-list--line-starts-with-comment (line mode)
   "Return non-nil if LINE starts with the comment marker for MODE."
   (let ((marker (cdr (assoc mode projectile-todo-list-comment-markers))))
@@ -93,30 +93,39 @@
     results))
 
 (defun projectile-todo-list--display-results (results)
-  "Display RESULTS in a buffer with navigation controls."
+  "Display RESULTS in the results buffer."
   (with-current-buffer (get-buffer-create projectile-todo-list-results-buffer)
-    (read-only-mode -1)
-    (erase-buffer)
-    (insert (format "%-8s %-40s %s\n" "Line" "File" "Text"))
-    (insert (make-string 80 ?-) "\n")
-    (dolist (item results)
-      (let* ((file (plist-get item :file))
-	     (line (plist-get item :line))
-	     (text (plist-get item :text)))
-	(insert-text-button
-	 (format"%-8d %-40s %s\n" line (file-name-nondirectory file) text)
-         'action (lambda (_) (find-file file) (goto-line line))
-         'follow-link t)))
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (insert (format "%-8s %-40s %s\n" "Line" "File" "Text"))
+      (insert (make-string 80 ?-) "\n")
+      (dolist (item results)
+        (let* ((file (plist-get item :file))
+               (line (plist-get item :line))
+               (text (plist-get item :text)))
+          (insert-text-button
+           (format "%-8d %-40s %s\n" line (file-name-nondirectory file) text)
+           'action (lambda (_) (find-file file) (goto-line line))
+           'follow-link t))))
     (read-only-mode 1)
-    (goto-char (point-min))
-    (display-buffer (current-buffer))))
+    (goto-char (point-min)))
+  (display-buffer projectile-todo-list-results-buffer))
 
 ;;;###autoload
 (defun projectile-todo-list-run ()
   "Scan and list TODO/FIXME style comments in your projectile project."
   (interactive)
-  (let ((results (projectile-todo-list--collect-todos)))
-    (projectile-todo-list--display-results)))
+  (if (fboundp 'make-thread)
+      (progn
+        (message "Scanning project for TODOs...")
+        (make-thread
+         (lambda ()
+           (let ((results (projectile-todo-list--collect-todos)))
+             ;; Schedule back on main thread
+             (run-at-time 0 nil #'projectile-todo-list--display-results results)))))
+    ;; Fallback for older Emacs versions or builds with no thread support
+    (let ((results (projectile-todo-list--collect-todos)))
+      (projectile-todo-list--display-results results))))
 
 (provide 'projectile-todo-list)
 
