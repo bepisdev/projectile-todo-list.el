@@ -4,6 +4,7 @@
 ;; Author: Josh Burns
 ;; Created: 23 Apr 2025
 ;; Version: 0.1
+;; URL: https://github.com/joshburnsxyz/projectile-todo-list.el
 ;; Package-Requires: ((emacs "27.1")
 ;;                    (projectile "2.9.1"))
 ;; Keywords: convenience, tools, project, todo, productivity
