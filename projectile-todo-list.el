@@ -24,6 +24,15 @@
 (require 'projectile)
 (require 'subr-x) ;; for string-trim
 
+(defgroup projectile-todo-list nil
+  "Scan and list TODO/FIXME style comments in your projectile project."
+  :group tools)
+
+(defcustom projectile-todo-list-keywords '("TODO" "FIXME" "HACK" "NOTE")
+  "Keywords to search for in code file comments."
+  :type '(repeat string)
+  :group 'projectile-todo-list)
+
 (provide 'projectile-todo-list)
 
 ;;; projectile-todo-list.el ends here
