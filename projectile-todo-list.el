@@ -110,6 +110,13 @@
     (goto-char (point-min))
     (display-buffer (current-buffer))))
 
+;;;###autoload
+(defun projectile-todo-list-run ()
+  "Scan and list TODO/FIXME style comments in your projectile project."
+  (interactive)
+  (let ((results (projectile-todo-list--collect-todos)))
+    (projectile-todo-list--display-results)))
+
 (provide 'projectile-todo-list)
 
 ;;; projectile-todo-list.el ends here
