@@ -28,7 +28,7 @@ To install via [`quelpa-use-package`](https://github.com/quelpa/quelpa-use-packa
   :ensure t)
 
 (use-package projectile-todo-list
-  :quelpa (:fetcher github :repo "joshburnsxyz/projectile-todo-list.el")
+  :quelpa (:fetcher github :repo "bepisdev/projectile-todo-list.el")
   :commands (projectile-todo-list-run))
 
 ```
